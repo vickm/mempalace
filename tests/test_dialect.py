@@ -109,11 +109,25 @@ class TestCompressionStats:
         original = "We decided to use GraphQL instead of REST. " * 10
         compressed = d.compress(original)
         stats = d.compression_stats(original, compressed)
-        assert stats["ratio"] > 1
-        assert stats["original_chars"] > stats["compressed_chars"]
+        assert stats["size_ratio"] > 1
+        assert stats["original_chars"] > stats["summary_chars"]
 
     def test_count_tokens(self):
-        assert Dialect.count_tokens("hello world") == len("hello world") // 3
+        assert Dialect.count_tokens("hello world") == 2
+
+    def test_compression_stats_keys(self):
+        """Verify compression_stats() returns the expected key set."""
+        d = Dialect()
+        stats = d.compression_stats("hello world this is a test", "HW:test")
+        expected_keys = {
+            "original_chars",
+            "summary_chars",
+            "original_tokens_est",
+            "summary_tokens_est",
+            "size_ratio",
+            "note",
+        }
+        assert set(stats.keys()) == expected_keys
 
 
 class TestZettelEncoding:
